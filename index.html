@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Zee Assistant</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #1a1a2e; color: white; margin: 0; padding: 20px; }
+    h1 { text-align: center; color: #00d4ff; }
+    #chat-box { background: #16213e; border-radius: 10px; padding: 15px; height: 400px; overflow-y: auto; margin-bottom: 15px; }
+    .user-msg { background: #0f3460; padding: 10px; border-radius: 8px; margin: 8px 0; text-align: right; }
+    .ai-msg { background: #533483; padding: 10px; border-radius: 8px; margin: 8px 0; }
+    #input-area { display: flex; gap: 10px; }
+    #user-input { flex: 1; padding: 12px; border-radius: 8px; border: none; font-size: 16px; }
+    #send-btn { padding: 12px 20px; background: #00d4ff; border: none; border-radius: 8px; color: black; font-weight: bold; cursor: pointer; font-size: 16px; }
+  </style>
+</head>
+<body>
+  <h1>🤖 AI Assistant</h1>
+  <div id="chat-box"></div>
+  <div id="input-area">
+    <input type="text" id="user-input" placeholder="Type your message..." />
+    <button id="send-btn" onclick="sendMessage()">Send</button>
+  </div>
+
+  <script>
+    const API_KEY = "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";
+    const API_URL = "https://router.huggingface.co/v1/chat/completions";
+
+    async function sendMessage() {
+      const input = document.getElementById("user-input");
+      const chatBox = document.getElementById("chat-box");
+      const message = input.value.trim();
+      if (!message) return;
+
+      chatBox.innerHTML += `<div class="user-msg">You: ${message}</div>`;
+      input.value = "";
+      chatBox.innerHTML += `<div class="ai-msg" id="typing">AI: Thinking...</div>`;
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${API_KEY}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            model: "meta-llama/Meta-Llama-3-8B-Instruct",
+            messages: [{ role: "user", content: message }],
+            max_tokens: 500
+          })
+        });
+
+        const data = await response.json();
+        const reply = data.choices[0].message.content;
+        document.getElementById("typing").innerText = "AI: " + reply;
+      } catch (error) {
+        document.getElementById("typing").innerText = "AI: Error! Check your API key.";
+      }
+
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    document.getElementById("user-input").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") sendMessage();
+    });
+  </script>
+</body>
+</html>
