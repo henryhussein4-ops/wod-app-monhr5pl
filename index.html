@@ -52,10 +52,16 @@
         });
 
         const data = await response.json();
-        const reply = data.choices[0].message.content;
-        document.getElementById("typing").innerText = "AI: " + reply;
+
+        if (data.choices && data.choices[0]) {
+          const reply = data.choices[0].message.content;
+          document.getElementById("typing").innerText = "AI: " + reply;
+        } else {
+          document.getElementById("typing").innerText = "DEBUG: " + JSON.stringify(data);
+        }
+
       } catch (error) {
-        document.getElementById("typing").innerText = "AI: Error! Check your API key.";
+        document.getElementById("typing").innerText = "ERROR: " + error.message;
       }
 
       chatBox.scrollTop = chatBox.scrollHeight;
